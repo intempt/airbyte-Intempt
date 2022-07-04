@@ -36,12 +36,16 @@ public abstract class Initializer {
         final Map<String, JsonNode> collectionMap = createCollection(orgName, apiKey, sourceId, catalog);
         LOGGER.info("Initializing primary identifiers");
         final Map<String, JsonNode> primaryIdMap = createPrimaryId(orgName, apiKey, sourceId, collectionMap);
+
         LOGGER.info("Initializing Foreign Key identifiers & Relations");
         createForeignIdAndRelations(orgName, apiKey, sourceId, primaryIdMap, collectionMap, catalog);
+
         LOGGER.info("Initializing Profile identifiers");
         createProfileId(orgName, apiKey, sourceId, collectionMap);
+
         LOGGER.info("Initializing Profile attributes");
         createProfileAttribute(orgName, apiKey, sourceId, collectionMap);
+
         return getCollectionId(collectionMap);
     }
 

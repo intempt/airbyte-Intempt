@@ -115,10 +115,13 @@ public class StripeInitializer extends Initializer {
     protected void createProfileId(String orgName, String apiKey, String sourceId,
                                    Map<String, JsonNode> collectionMap) {
         try {
-            collectionService.setDisplay(orgName, apiKey, sourceId, "customers");
-            final JsonNode customers = collectionMap.get("customers");
-            identifierService.createProfileId(
-                    orgName, apiKey, customers, "CustomerId", primaryIdSchema("CustomerId"));
+            final JsonNode customers = collectionMap.get(CUSTOMERS);
+            final HttpResponse<String> byCollId = identifierService.getByCollId(orgName, apiKey, customers.get("id").asText());
+            final JsonNode profileOrNull = identifierService.getProfileOrNull(byCollId.body());
+            if (profileOrNull.isNull()) {
+                identifierService.createProfileId(
+                        orgName, apiKey, customers, "CustomerId", primaryIdSchema("CustomerId"));
+            }
         } catch (Exception e) {
             throw new RuntimeException();
         }
@@ -129,9 +132,17 @@ public class StripeInitializer extends Initializer {
                                           Map<String, JsonNode> collectionMap) {
         try {
             final JsonNode collection = collectionMap.get(CUSTOMERS);
-            profileAttributeService.create(orgName, apiKey, collection, "email");
-            profileAttributeService.create(orgName, apiKey, collection, "phone");
-            profileAttributeService.create(orgName, apiKey, collection, "name");
+            final HttpResponse<String> byCollId = profileAttributeService.getByCollId(
+                    orgName, apiKey, collection.get("id").asText());
+            if (!profileAttributeService.contains(byCollId.body(), "email")) {
+                profileAttributeService.create(orgName, apiKey, collection, "email");
+            }
+            if (!profileAttributeService.contains(byCollId.body(), "phone")) {
+                profileAttributeService.create(orgName, apiKey, collection, "phone");
+            }
+            if (!profileAttributeService.contains(byCollId.body(), "name")) {
+                profileAttributeService.create(orgName, apiKey, collection, "name");
+            }
         } catch (Exception e) {
             throw new RuntimeException();
         }
