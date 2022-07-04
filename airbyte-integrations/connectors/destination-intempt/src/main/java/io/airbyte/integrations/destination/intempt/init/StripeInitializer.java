@@ -88,7 +88,7 @@ public class StripeInitializer extends Initializer {
                                                         Map<String, JsonNode> collectionMap,
                                                         ConfiguredAirbyteCatalog catalog) {
         catalog.getStreams().stream().filter(stream ->
-                stream.getStream().getJsonSchema().get("properties").has(CUSTOMERS))
+                stream.getStream().getJsonSchema().get("properties").has("customer"))
                 .forEach(airbyteStream -> {
                     try {
                         final String name = airbyteStream.getStream().getName();
