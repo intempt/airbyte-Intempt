@@ -3,7 +3,6 @@ package io.airbyte.integrations.destination.intempt.client.relation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.airbyte.integrations.destination.intempt.client.Service;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
@@ -13,7 +12,7 @@ import java.util.Map;
 public class RelationService extends Service {
 
     public HttpResponse<String> create(String orgName, String apiKey, String name, String refId, RelationType type)
-            throws IOException, InterruptedException, URISyntaxException {
+            throws Exception{
         final String relation = createRelation(name, type, refId);
         final URI uri = createUri(orgName);
         return makePostRequest(apiKey, uri, relation);

@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.http.HttpStatusCode;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
@@ -27,19 +26,18 @@ public class CollectionService extends Service {
 
     private static final String PATH = "/collections/";
 
-    public HttpResponse<String> create(String orgName, String body, String apiKey)
-            throws IOException, InterruptedException, URISyntaxException {
+    public HttpResponse<String> create(String orgName, String body, String apiKey) throws Exception {
         final URI uri = createUri(orgName);
         return makePostRequest(apiKey, uri, body);
     }
 
-    public HttpResponse<String> getByNameAndSourceId(String orgName, String apiKey, String sourceId, String name) throws IOException, InterruptedException, URISyntaxException {
+    public HttpResponse<String> getByNameAndSourceId(String orgName, String apiKey, String sourceId, String name)
+            throws Exception{
         final URI uriGetByName = createUriGetByName(orgName, sourceId, name);
         return makeGetRequest(apiKey, uriGetByName);
     }
 
-    public HttpResponse<String> update(String orgName, String apiKey, String collId, String body)
-            throws IOException, InterruptedException, URISyntaxException {
+    public HttpResponse<String> update(String orgName, String apiKey, String collId, String body) throws Exception {
         final URI uriPut = createUriPut(orgName, collId);
         return makePutRequest(apiKey, uriPut, body);
     }
@@ -59,8 +57,7 @@ public class CollectionService extends Service {
         return objectMapper.readTree(body);
     }
 
-    public void setDisplay(String orgName, String apiKey, String sourceId)
-            throws IOException, URISyntaxException, InterruptedException {
+    public void setDisplay(String orgName, String apiKey, String sourceId) throws Exception {
         LOGGER.info("Set Display customers");
         final HttpResponse<String> customersResponse = getByNameAndSourceId(orgName, apiKey, sourceId, "customers");
         LOGGER.info("body: {}", customersResponse.body());

@@ -4,7 +4,6 @@ import io.airbyte.integrations.destination.intempt.client.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
@@ -13,9 +12,9 @@ public class PushService extends Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PushService.class);
 
-    public HttpResponse<String> pushData(String orgName, String body, String collectionId, String apiKey) throws IOException, InterruptedException, URISyntaxException {
+    public HttpResponse<String> pushData(String orgName, String body, String collectionId, String apiKey)
+            throws Exception{
         final URI uri = createUri(orgName, collectionId);
-
         return makePostRequest(apiKey, uri, body);
     }
 

@@ -9,7 +9,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
@@ -23,8 +22,7 @@ public class IdentifierService extends Service {
     private static final String PATH = "/identifiers/";
 
     public HttpResponse<String> createProfileId(String orgName, String apiKey,
-                                                JsonNode collection, String name, Schema schema)
-            throws IOException, InterruptedException, URISyntaxException {
+                                                JsonNode collection, String name, Schema schema) throws Exception {
         final String idName = StringUtils.capitalize(name);
         final String stringId = createIdentifier(collection, idName, IdentifierType.PROFILE, schema, null);
 
@@ -33,23 +31,20 @@ public class IdentifierService extends Service {
     }
 
     public HttpResponse<String> createPrimaryId(String orgName, String apiKey,
-                                                JsonNode collection, String name, Schema schema)
-            throws IOException, InterruptedException, URISyntaxException {
+                                                JsonNode collection, String name, Schema schema) throws Exception {
         final String stringId = createIdentifier(collection, name, IdentifierType.PRIMARY, schema, null);
         final URI uri = createUri(orgName);
         return makePostRequest(apiKey, uri, stringId);
     }
 
     public HttpResponse<String> createForeignId(String orgName, String apiKey, JsonNode collection,
-                                                Schema schema, String name, String refId)
-            throws IOException, InterruptedException, URISyntaxException {
+                                                Schema schema, String name, String refId) throws Exception {
         final String stringId = createIdentifier(collection, name, IdentifierType.FOREIGN, schema, refId);
         final URI uri = createUri(orgName);
         return makePostRequest(apiKey, uri, stringId);
     }
 
-    public HttpResponse<String> getByCollId(String orgName, String apiKey, String collId)
-            throws IOException, InterruptedException, URISyntaxException {
+    public HttpResponse<String> getByCollId(String orgName, String apiKey, String collId) throws Exception {
         final URI uriGetByCollId = createUriGetByCollId(orgName, collId);
         return makeGetRequest(apiKey, uriGetByCollId);
     }
@@ -67,7 +62,6 @@ public class IdentifierService extends Service {
     }
 
     public JsonNode extractIdentifier(String body, IdentifierType type) throws JsonProcessingException {
-        LOGGER.info("Parsing collection list body: {}", body);
         JsonNode identifierList = objectMapper.readTree(body).get("_embedded").get("identifiers");
 
         for (JsonNode identifier : identifierList) {

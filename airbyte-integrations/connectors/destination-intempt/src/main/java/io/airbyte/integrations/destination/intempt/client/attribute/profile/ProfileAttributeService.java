@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.airbyte.integrations.destination.intempt.client.Service;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
@@ -14,7 +13,8 @@ import java.util.Map;
 public class ProfileAttributeService extends Service {
     private static final String PATH = "/profile-attributes";
 
-    public HttpResponse<String> create(String orgName, String apiKey, JsonNode collection, String fieldName) throws IOException, InterruptedException, URISyntaxException {
+    public HttpResponse<String> create(String orgName, String apiKey, JsonNode collection, String fieldName)
+            throws Exception{
         final String profileAttribute = createProfileAttribute(collection, fieldName);
         final URI uri = createUri(orgName);
         return makePostRequest(apiKey, uri, profileAttribute);
