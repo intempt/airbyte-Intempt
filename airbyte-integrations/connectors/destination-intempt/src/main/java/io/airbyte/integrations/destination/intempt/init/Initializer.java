@@ -3,19 +3,26 @@ package io.airbyte.integrations.destination.intempt.init;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.CaseFormat;
 import io.airbyte.protocol.models.ConfiguredAirbyteCatalog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class Initializer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Initializer.class);
+
     public Map<String, String> init(String orgName, String apiKey, String sourceId,
-                             ConfiguredAirbyteCatalog catalog, String sourceType) {
+                             ConfiguredAirbyteCatalog catalog) {
         final Map<String, JsonNode> collectionMap = createCollection(orgName, apiKey, sourceId, catalog);
-        System.out.println(collectionMap);
+        LOGGER.info("Initializing primary identifiers");
         final Map<String, JsonNode> primaryIdMap = createPrimaryId(orgName, apiKey, sourceId, collectionMap);
+        LOGGER.info("Initializing Foreign Key identifiers & Relations");
         createForeignIdAndRelations(orgName, apiKey, sourceId, primaryIdMap, collectionMap, catalog);
+        LOGGER.info("Initializing Profile identifiers");
         createProfileId(orgName, apiKey, sourceId, collectionMap);
+        LOGGER.info("Initializing Profile attributes");
         createProfileAttribute(orgName, apiKey, sourceId, collectionMap);
         return getCollectionId(collectionMap);
     }

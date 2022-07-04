@@ -26,22 +26,22 @@ public class IntemptConsumer extends FailureTrackingAirbyteMessageConsumer {
     @Override
     protected void startTracked() throws Exception {
         // determine what to do
-        LOGGER.info("starting intempt consumer");
+        LOGGER.info("starting Intempt consumer");
     }
 
     @Override
     protected void acceptTracked(AirbyteMessage msg) throws Exception {
-        LOGGER.info("msg recieved {}", msg);
+        LOGGER.info("msg received {}", msg);
         if (msg.getType() == AirbyteMessage.Type.RECORD) {
             final AirbyteRecordMessage recordMsg = msg.getRecord();
             pushService.pushData(orgName, recordMsg.toString(), collectionId.get(recordMsg.getStream()), apiKey);
-            LOGGER.info("data pushed succesfully");
+            LOGGER.info("data pushed successfully");
         }
     }
 
     @Override
     protected void close(boolean hasFailed) throws Exception {
         // determine what to do
-        LOGGER.info("closing intempt consumer");
+        LOGGER.info("closing Intempt consumer");
     }
 }

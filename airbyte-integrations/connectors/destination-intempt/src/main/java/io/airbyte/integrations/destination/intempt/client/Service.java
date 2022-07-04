@@ -2,6 +2,8 @@ package io.airbyte.integrations.destination.intempt.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.http.HttpStatusCode;
 
 import java.net.URI;
@@ -13,6 +15,8 @@ import java.nio.charset.StandardCharsets;
 
 public abstract class Service {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
+
     public static final String HOST =
             "https://api.staging.intempt.com/v1/";
 
@@ -23,6 +27,8 @@ public abstract class Service {
 
     public HttpResponse<String> isOK(HttpResponse<String> response) throws HttpException {
         if (response.statusCode() != HttpStatusCode.OK) {
+            LOGGER.error("Request to : {} failed with status code: {}",
+                    response.request().uri(), response.statusCode());
             throw new HttpException(response.body() + "\nstatus-code: " + response.statusCode());
         }
         return response;
@@ -35,6 +41,7 @@ public abstract class Service {
                 .header("Content-Type", "application/json")
                 .build();
 
+        LOGGER.info("Sending POST request to: {}", uri);
         final HttpResponse<String> response = client.send(postRequest, HttpResponse.BodyHandlers.ofString());
         return isOK(response);
     }
@@ -45,6 +52,7 @@ public abstract class Service {
                 .header("Authorization", "Bearer " + apiKey)
                 .build();
 
+        LOGGER.info("Sending GET request to: {}", uri);
         final HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
         return isOK(response);
     }
@@ -56,6 +64,7 @@ public abstract class Service {
                 .header("Content-Type", "application/json")
                 .build();
 
+        LOGGER.info("Sending PUT request to: {}", uri);
         final HttpResponse<String> response = client.send(putRequest, HttpResponse.BodyHandlers.ofString());
         return isOK(response);
     }

@@ -55,14 +55,17 @@ public class IntemptDestination extends BaseConnector implements Destination {
   public AirbyteMessageConsumer getConsumer(JsonNode config,
                                             ConfiguredAirbyteCatalog configuredCatalog,
                                             Consumer<AirbyteMessage> outputRecordCollector) {
+    LOGGER.info("Extracting config");
     final String apiKey = config.get("api_key").asText();
     final String orgName = config.get("org_name").asText();
     final String sourceId = config.get("source_id").asText();
 
     try {
+      LOGGER.info("Starting job for sourceId {}, orgName {}", sourceId, orgName);
       final String sourceType = sourceService.getType(orgName, apiKey, sourceId);
+      LOGGER.info("Starting Initializer for source type {}", sourceType);
       final Map<String, String> collectionId = initializerMap.get(sourceType)
-              .init(orgName, apiKey, sourceId, configuredCatalog, sourceType);
+              .init(orgName, apiKey, sourceId, configuredCatalog);
 
       return new IntemptConsumer(orgName, apiKey, collectionId);
     } catch (Exception e) {

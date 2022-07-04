@@ -10,7 +10,6 @@ import org.apache.avro.Schema;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.http.HttpStatusCode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -48,67 +47,46 @@ public class CollectionService extends Service {
     }
 
     public JsonNode extractCollectionList(String body) throws JsonProcessingException {
-        LOGGER.info("Parsing collection list body: {}", body);
         return objectMapper.readTree(body).get("_embedded").get("collections").get(0);
     }
 
     public JsonNode extractCollection(String body) throws JsonProcessingException {
-        LOGGER.info("Parsing collection body: {}", body);
         return objectMapper.readTree(body);
     }
 
-    public void setDisplay(String orgName, String apiKey, String sourceId) throws Exception {
-        LOGGER.info("Set Display customers");
-        final HttpResponse<String> customersResponse = getByNameAndSourceId(orgName, apiKey, sourceId, "customers");
-        LOGGER.info("body: {}", customersResponse.body());
-        final JsonNode collection = objectMapper.readTree(customersResponse.body()).get("_embedded").get("collections").get(0);
+    /**
+     * Updates schema of a collection. Adds 'display: true' property to all fields.
+     * These fields will be visible in the event editor.
+     */
+    public void setDisplay(String orgName, String apiKey, String sourceId, String collectionName) throws Exception {
+        LOGGER.info("Setting display property for collection {}", collectionName);
+        final HttpResponse<String> customersResponse = getByNameAndSourceId(orgName, apiKey, sourceId, collectionName);
+        final JsonNode collection = extractCollectionList(customersResponse.body());
+        final JsonNode schema = collection.get("schema");
 
-        LOGGER.info("Extracting");
-        final JsonNode customers = collection.get("schema");
-
-        LOGGER.info("Extracting 1");
         ArrayNode arrayNode = objectMapper.createArrayNode();
         List<JsonNode> list = new ArrayList<>();
-
-        LOGGER.info("Extracting 2");
-        customers.get("fields").forEach(field -> {
-            LOGGER.info("Extracting inside {}", field);
+        schema.get("fields").forEach(field -> {
             ((ObjectNode) field).set("display", BooleanNode.getTrue());
-            LOGGER.info("Extracting inside after");
             list.add(field);
         });
-
         arrayNode.addAll(list);
-        LOGGER.info("Setting display");
-        ((ObjectNode) customers).set("fields", arrayNode);
-        String collectionString = convertToString("customers", customers, sourceId);
-        HttpResponse<String> update = update(orgName, apiKey, collection.get("id").asText(), collectionString);
-        LOGGER.info("Completed setting display with status: {}", update.statusCode());
-        if (update.statusCode() != HttpStatusCode.OK) {
-            throw new RuntimeException(update.body());
-        }
+        ((ObjectNode) schema).set("fields", arrayNode);
+
+        String collectionString = convertToString(collectionName, schema, sourceId);
+        update(orgName, apiKey, collection.get("id").asText(), collectionString);
     }
 
     public String convertToString(String name, Schema schema, String sourceId) throws JsonProcessingException {
-        LOGGER.info("Converting collection to string: {}, schema {} ", name, schema);
         return convertToString(name, objectMapper.readTree(schema.toString()), sourceId);
     }
 
     public String convertToString(String name, JsonNode schema, String sourceId) throws JsonProcessingException {
-        LOGGER.info("Converting collection to string: {}, sourceId: {}, schema {} ", sourceId, name, schema);
         final Map<Object, Object> map = new HashMap<>();
         map.put("name", name);
-        LOGGER.info("name");
-        objectMapper.writeValueAsString(map);
         map.put("title", name);
-        LOGGER.info("title");
-        objectMapper.writeValueAsString(map);
         map.put("schema", schema);
-        LOGGER.info("schema");
-        objectMapper.writeValueAsString(map);
         map.put("sourceId", sourceId);
-        LOGGER.info("sourceId");
-        objectMapper.writeValueAsString(map);
 
         return objectMapper.writeValueAsString(map);
     }

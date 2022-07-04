@@ -6,8 +6,6 @@ import io.airbyte.integrations.destination.intempt.client.Service;
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,8 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class IdentifierService extends Service {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(IdentifierService.class);
 
     private static final String PATH = "/identifiers/";
 
@@ -83,7 +79,6 @@ public class IdentifierService extends Service {
         identifier.put("schema", jsonNode);
 
         if (refId != null) {
-            LOGGER.info("putting refId");
             identifier.put("referenceId", refId);
         }
 

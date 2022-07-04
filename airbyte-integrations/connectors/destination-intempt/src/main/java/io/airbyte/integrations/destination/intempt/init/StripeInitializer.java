@@ -48,6 +48,7 @@ public class StripeInitializer extends Initializer {
                         orgName, apiKey, sourceId, stream.getName());
 
                 if (collectionService.isEmpty(byNameAndSourceId.body())) {
+                    LOGGER.info("Converting schema for {}, with namespace: {}", stream.getName(), NAMESPACE);
                     final Schema schema = schemaConverter.getAvroSchema(
                             stream.getJsonSchema(), stream.getName(), NAMESPACE);
 
@@ -128,7 +129,7 @@ public class StripeInitializer extends Initializer {
     protected void createProfileId(String orgName, String apiKey, String sourceId,
                                    Map<String, JsonNode> collectionMap) {
         try {
-            collectionService.setDisplay(orgName, apiKey, sourceId);
+            collectionService.setDisplay(orgName, apiKey, sourceId, "customers");
             final JsonNode customers = collectionMap.get("customers");
             identifierService.createProfileId(
                     orgName, apiKey, customers, "CustomerId", primaryIdSchema("CustomerId"));

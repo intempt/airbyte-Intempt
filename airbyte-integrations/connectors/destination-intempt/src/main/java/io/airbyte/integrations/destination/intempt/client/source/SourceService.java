@@ -3,7 +3,6 @@ package io.airbyte.integrations.destination.intempt.client.source;
 import io.airbyte.integrations.destination.intempt.client.Service;
 import io.airbyte.protocol.models.AirbyteConnectionStatus;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
