@@ -10,8 +10,7 @@ import java.net.http.HttpResponse;
 
 public class SourceService extends Service {
 
-    public AirbyteConnectionStatus checkById(String orgName, String apiKey, String sourceId)
-            throws URISyntaxException, IOException, InterruptedException {
+    public AirbyteConnectionStatus checkById(String orgName, String apiKey, String sourceId) throws Exception {
         final URI uri = createUriGet(orgName, sourceId);
         final HttpResponse<String> response = makeGetRequest(apiKey, uri);
 
@@ -24,8 +23,7 @@ public class SourceService extends Service {
                 .withStatus(AirbyteConnectionStatus.Status.SUCCEEDED);
     }
 
-    public String getType(String orgName, String apiKey, String sourceId)
-            throws URISyntaxException, IOException, InterruptedException {
+    public String getType(String orgName, String apiKey, String sourceId) throws Exception {
         final URI uri = createUriGet(orgName, sourceId);
         HttpResponse<String> response = makeGetRequest(apiKey, uri);
         return objectMapper.readTree(response.body()).get("type").asText();

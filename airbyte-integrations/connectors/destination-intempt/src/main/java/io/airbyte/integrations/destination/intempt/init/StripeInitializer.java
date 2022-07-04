@@ -58,6 +58,7 @@ public class StripeInitializer extends Initializer {
 
                     final JsonNode collectionJson = collectionService.extractCollection(postResponse.body());
                     collectionMap.put(stream.getName(), collectionJson);
+                    return;
                 }
                 final JsonNode collectionJson = collectionService.extractCollectionList(byNameAndSourceId.body());
                 collectionMap.put(stream.getName(), collectionJson);
@@ -84,7 +85,7 @@ public class StripeInitializer extends Initializer {
                     final HttpResponse<String> primaryId =
                             identifierService.createPrimaryId(orgName, apiKey, collection, name, schema);
                     final JsonNode primaryIdentifier = objectMapper.readTree(primaryId.body());
-                    identifierMap.put(primaryIdentifier.get("name").asText(), primaryIdentifier);
+                    identifierMap.put(collectionName, primaryIdentifier);
                 }
                 identifierMap.put(collectionName, primaryOrNull);
             } catch (Exception e) {
@@ -114,7 +115,7 @@ public class StripeInitializer extends Initializer {
                             final HttpResponse<String> foreignId = identifierService.createForeignId(
                                     orgName, apiKey, collection, foreignIdSchema(), name, primaryId);
                             final JsonNode idNode = objectMapper.readTree(foreignId.body());
-                            final HttpResponse<String> response = relationService.create(
+                            relationService.create(
                                     orgName, apiKey, name, idNode.get("id").asText(), RelationType.MANY_TO_ONE);
                         }
                     } catch (Exception e) {

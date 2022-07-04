@@ -9,12 +9,10 @@ import java.util.stream.Collectors;
 
 public abstract class Initializer {
 
-    private final Map<String, Initializer> initializerMap = Map.of();
-
     public Map<String, String> init(String orgName, String apiKey, String sourceId,
                              ConfiguredAirbyteCatalog catalog, String sourceType) {
-        final Initializer initializer = initializerMap.get(sourceType);
-        final Map<String, JsonNode> collectionMap = initializer.createCollection(orgName, apiKey, sourceId, catalog);
+        final Map<String, JsonNode> collectionMap = createCollection(orgName, apiKey, sourceId, catalog);
+        System.out.println(collectionMap);
         final Map<String, JsonNode> primaryIdMap = createPrimaryId(orgName, apiKey, sourceId, collectionMap);
         createForeignIdAndRelations(orgName, apiKey, sourceId, primaryIdMap, collectionMap, catalog);
         createProfileId(orgName, apiKey, sourceId, collectionMap);
