@@ -7,17 +7,26 @@ package io.airbyte.integrations.destination.intempt;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.airbyte.integrations.BaseConnector;
 import io.airbyte.integrations.base.AirbyteMessageConsumer;
+import io.airbyte.integrations.base.AirbyteTraceMessageUtility;
 import io.airbyte.integrations.base.Destination;
 import io.airbyte.integrations.base.IntegrationRunner;
 import io.airbyte.integrations.destination.intempt.client.source.SourceService;
+import io.airbyte.integrations.destination.intempt.init.Initializer;
+import io.airbyte.integrations.destination.intempt.init.StripeInitializer;
 import io.airbyte.protocol.models.AirbyteConnectionStatus;
 import io.airbyte.protocol.models.AirbyteMessage;
 import io.airbyte.protocol.models.ConfiguredAirbyteCatalog;
+
+import java.util.Map;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IntemptDestination extends BaseConnector implements Destination {
+
+  private final Map<String, Initializer> initializerMap = Map.of(
+      "api", new StripeInitializer()
+  );
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IntemptDestination.class);
 
@@ -46,8 +55,20 @@ public class IntemptDestination extends BaseConnector implements Destination {
   public AirbyteMessageConsumer getConsumer(JsonNode config,
                                             ConfiguredAirbyteCatalog configuredCatalog,
                                             Consumer<AirbyteMessage> outputRecordCollector) {
-    // TODO
-    return null;
+    final String apiKey = config.get("api_key").asText();
+    final String orgName = config.get("org_name").asText();
+    final String sourceId = config.get("source_id").asText();
+
+    try {
+      final String sourceType = sourceService.getType(orgName, apiKey, sourceId);
+      final Map<String, String> collectionId = initializerMap.get(sourceType)
+              .init(orgName, apiKey, sourceId, configuredCatalog, sourceType);
+
+      return new IntemptConsumer(orgName, apiKey, collectionId);
+    } catch (Exception e) {
+      AirbyteTraceMessageUtility.emitSystemErrorTrace(e, e.getMessage());
+      throw new RuntimeException(e);
+    }
   }
 
 }
