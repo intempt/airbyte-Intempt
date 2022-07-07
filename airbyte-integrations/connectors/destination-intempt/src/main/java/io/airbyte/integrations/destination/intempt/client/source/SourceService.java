@@ -1,5 +1,6 @@
 package io.airbyte.integrations.destination.intempt.client.source;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.airbyte.integrations.destination.intempt.client.Service;
 import io.airbyte.protocol.models.AirbyteConnectionStatus;
 
@@ -22,10 +23,10 @@ public class SourceService extends Service {
                 .withStatus(AirbyteConnectionStatus.Status.SUCCEEDED);
     }
 
-    public String getType(String orgName, String apiKey, String sourceId) throws Exception {
+    public JsonNode get(String orgName, String apiKey, String sourceId) throws Exception {
         final URI uri = createUriGet(orgName, sourceId);
         HttpResponse<String> response = makeGetRequest(apiKey, uri);
-        return objectMapper.readTree(response.body()).get("type").asText();
+        return objectMapper.readTree(response.body());
     }
 
     protected URI createUriGet(String orgName, String sourceId) throws URISyntaxException {

@@ -62,9 +62,13 @@ public class IntemptDestination extends BaseConnector implements Destination {
 
     try {
       LOGGER.info("Starting job for sourceId {}, orgName {}", sourceId, orgName);
-      final String sourceType = sourceService.getType(orgName, apiKey, sourceId);
-      LOGGER.info("Starting Initializer for source type {}", sourceType);
-      final Map<String, String> collectionId = initializerMap.get(sourceType)
+      final JsonNode source = sourceService.get(orgName, apiKey, sourceId);
+      if (!source.get("active").asBoolean()) {
+        LOGGER.error("Source is not active");
+        throw new RuntimeException("Source is not active");
+      }
+      LOGGER.info("Starting Initializer for source type {}", source.get("type").asText());
+      final Map<String, String> collectionId = initializerMap.get(source.get("type").asText())
               .init(orgName, apiKey, sourceId, configuredCatalog);
 
       return new IntemptConsumer(orgName, apiKey, collectionId);
